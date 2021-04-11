@@ -2,20 +2,8 @@
 Project MF810: Tensorflow conversion
 Original code from: Maziar Raissi
 https://maziarraissi.github.io/FBSNNs/
-
-Team 2: 
-"Shang, Dapeng" <dpshang@bu.edu>,
-"Leng, Congshan" <amier98@bu.edu>,
-"Xia, Shiyue" <syxia@bu.edu>,
-"Chang, Jung Cheng" <junchang@bu.edu>,
-"Deng, Hanrui" <hanrui@bu.edu>,
-"Ge, Jinjing" <willge@bu.edu>
-"Vivero Cabeza, Diego" <dvivero@bu.edu>
 """
 
-'''We left part of the original code commented out
-for comparison purposes
-'''
 
 import numpy as np
 import tensorflow as tf
@@ -44,31 +32,8 @@ class FBSNN(ABC): # Forward-Backward Stochastic Neural Network
         # layers
         self.layers = layers # (D+1) --> 1
         
-
         # initialize NN
         self.initialize_NN(layers)
-        
-        # We don't need to initialize session
-        # tf session 
-        # self.sess = tf.compat.v1.Session(config=tf.compat.v1.ConfigProto(allow_soft_placement=True,
-        #                                               log_device_placement=True))
-        
-        # tf placeholders and graph (training)
-        # self.learning_rate = tf.compat.v1.placeholder(tf.float32, shape=[])
-        # self.t_tf = tf.compat.v1.placeholder(tf.float32, shape=[M, self.N+1, 1]) # M x (N+1) x 1
-        # self.W_tf = tf.compat.v1.placeholder(tf.float32, shape=[M, self.N+1, self.D]) # M x (N+1) x D
-        # self.Xi_tf = tf.compat.v1.placeholder(tf.float32, shape=[1, D]) # 1 x D
-
-        # self.loss, self.X_pred, self.Y_pred, self.Y0_pred = self.loss_function(self.t_tf, self.W_tf, self.Xi_tf)
-                
-        # optimizers
-        # self.optimizer = tf.compat.v1.train.AdamOptimizer(learning_rate = self.learning_rate)
-        # self.train_op = self.optimizer.minimize(self.loss)
-        # self.train_op = tf.keras.optimizers.Adam(learning_rate=1e-3)
-        
-        # initialize session and variables
-        # init = tf.compat.v1.global_variables_initializer()
-        # self.sess.run(init)
     
     def initialize_NN(self, layers):
         '''initializes the NN with random weights and 0 biases
@@ -87,15 +52,7 @@ class FBSNN(ABC): # Forward-Backward Stochastic Neural Network
 
         return
         
-    # def xavier_init(self, size):
-    #     '''generates random normal numbers with less than 2 std from the mean
-    #     '''
-    #     in_dim = size[0]
-    #     out_dim = size[1]        
-    #     xavier_stddev = np.sqrt(2/(in_dim + out_dim))
-    #     return tf.Variable(tf.random.truncated_normal([in_dim, out_dim],
-    #                                             stddev=xavier_stddev, dtype =tf.float64), dtype=tf.float64)
-    
+   
     def neural_net(self, X): #, weights, biases):
         '''returns the result of the network for the given weights and biases
         '''
@@ -114,9 +71,6 @@ class FBSNN(ABC): # Forward-Backward Stochastic Neural Network
         return Y
     
     def net_u(self, t, X): # M x 1, M x D
-        # u = self.neural_net(tf.concat([t,X], 1), self.weights, self.biases) # M x 1
-        # Du = tf.gradients(ys=u, xs=X)[0] # M x D
-
         with tf.GradientTape() as tape:
             tape.watch(X)
             u = tf.cast(self.neural_net(tf.concat([t,X], 1)), tf.float64) # M x 1
@@ -125,8 +79,6 @@ class FBSNN(ABC): # Forward-Backward Stochastic Neural Network
         return u, Du
 
     def Dg_tf(self, X): # M x D
-        #tf.gradients(ys=self.g_tf(X), xs=X)[0] 
-
         with tf.GradientTape() as tape:
             tape.watch(X)
             g = self.g_tf(X)
@@ -209,13 +161,9 @@ class FBSNN(ABC): # Forward-Backward Stochastic Neural Network
                 loss_value = self.loss_function(t_batch, W_batch, self.Xi)[0]
             gradients = tape.gradient(loss_value, self.nn.trainable_weights)
             opt.apply_gradients(zip(gradients, self.nn.trainable_weights))
-
-            # tf_dict = {self.Xi_tf: self.Xi, self.t_tf: t_batch, self.W_tf: W_batch, self.learning_rate: learning_rate}
-            # self.sess.run(self.train_op, tf_dict)
             
             if it % 100 == 0:
                 elapsed = time.time() - start_time
-                # loss_value, Y0_value, learning_rate_value = self.sess.run([self.loss, self.Y0_pred, self.learning_rate], tf_dict)
                 loss_value, _, _1, Y0_value = self.loss_function(t_batch, W_batch, self.Xi)
                 print('It: %d, Loss: %.3e, Y0: %.3f, Time: %.2f, learning rate: %.3f' % 
                       (it, loss_value, Y0_value, elapsed, learning_rate))
@@ -224,18 +172,10 @@ class FBSNN(ABC): # Forward-Backward Stochastic Neural Network
                 
             
     def predict(self, Xi_star, t_star, W_star):
-        
-        # tf_dict = {self.Xi_tf: Xi_star, self.t_tf: t_star, self.W_tf: W_star}
-        
-        # X_star = self.sess.run(self.X_pred, tf_dict)
-        # Y_star = self.sess.run(self.Y_pred, tf_dict)
-        
         _, X_star, Y_star, _1 = self.loss_function(t_star, W_star, Xi_star)
         
         return X_star, Y_star
     
-    ###########################################################################
-    ############################# Change Here! ################################
     ###########################################################################
     @abstractmethod
     def phi_tf(self, t, X, Y, Z): # M x 1, M x D, M x 1, M x D

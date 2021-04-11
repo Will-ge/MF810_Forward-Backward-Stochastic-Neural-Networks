@@ -3,14 +3,6 @@ Project MF810: Tensorflow conversion
 Original code from: Maziar Raissi
 https://maziarraissi.github.io/FBSNNs/
 
-Team 2: 
-"Shang, Dapeng" <dpshang@bu.edu>,
-"Leng, Congshan" <amier98@bu.edu>,
-"Xia, Shiyue" <syxia@bu.edu>,
-"Chang, Jung Cheng" <junchang@bu.edu>,
-"Deng, Hanrui" <hanrui@bu.edu>,
-"Ge, Jinjing" <willge@bu.edu>
-"Vivero Cabeza, Diego" <dvivero@bu.edu>
 """
 
 
@@ -18,7 +10,6 @@ import numpy as np
 import tensorflow as tf
 from FBSNN_final import FBSNN
 import matplotlib.pyplot as plt
-#from plotting import newfig, savefig
 print('Tensorflow version: ', tf.__version__)
 
 class BlackScholesBarenblatt(FBSNN):
@@ -60,10 +51,10 @@ if __name__ == "__main__":
                                    M, N, D,
                                    layers)
     
-    model.train(N_Iter = 25*10**3, learning_rate=1e-3)
-    # model.train(N_Iter = 3*10**4, learning_rate=1e-4)
-    # model.train(N_Iter = 3*10**4, learning_rate=1e-5)
-    # model.train(N_Iter = 2*10**4, learning_rate=1e-6)
+    model.train(N_Iter = 2*10**4, learning_rate=1e-3)
+    model.train(N_Iter = 3*10**4, learning_rate=1e-4)
+    model.train(N_Iter = 3*10**4, learning_rate=1e-5)
+    model.train(N_Iter = 2*10**4, learning_rate=1e-6)
     
     ##### PLOT RESULTS
     
@@ -92,7 +83,6 @@ if __name__ == "__main__":
     plt.title('100-dimensional Black-Scholes-Barenblatt')
     plt.legend()
     
-    # savefig('./figures/BSB_Apr18_50', crop = False)
     
     
     errors = np.sqrt((Y_test-Y_pred)**2/Y_test**2)
@@ -107,4 +97,3 @@ if __name__ == "__main__":
     plt.title('100-dimensional Black-Scholes-Barenblatt')
     plt.legend()
     
-    # savefig('./figures/BSB_Apr18_50_errors', crop = False)
